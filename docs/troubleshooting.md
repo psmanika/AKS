@@ -1,12 +1,14 @@
 # Troubleshooting
 
+Application Gateway Ingress Controller (AGIC) continuously monitors the folowing Kubernetes resources:
+  - [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) or [Pod](https://kubernetes.io/docs/concepts/workloads/pods/pod/#what-is-a-pod)
+  - [Service](https://kubernetes.io/docs/concepts/services-networking/service/)
+  - [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
-The Application Gateway Ingress Controller relies primarily on the Kubernetes
-[Service](https://kubernetes.io/docs/concepts/services-networking/service/) and
-[Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) resources to construct
-configuration for App Gateway. Surprising AGIC behavior (or none at all) could be as a result of
-missing or incorrect configuration.
-
+The following must be in place for AGIC to configure App Gateway with IPs of Kubernetes pods:
+  - More than one healthy pod available (deployed via Deployment or Pod resource)
+  - At least one Service resource, referencing an existing pod via matching `selector` labels
+  - An Ingress resource, which references the Service above and is annotated with `kubernetes.io/ingress.class: azure/application-gateway`
 
 * Get the existing namespaces in Kubernetes cluster. What namespace is your app
 running in? Is AGIC watching that namespace? Refer to the
