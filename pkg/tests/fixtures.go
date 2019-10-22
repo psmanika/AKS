@@ -302,6 +302,7 @@ func NewPodFixture(serviceName string, ingressNamespace string, containerName st
 						},
 					},
 					ReadinessProbe: NewProbeFixture(containerName),
+					LivenessProbe:  NewProbeFixture(containerName),
 				},
 			},
 		},
