@@ -24,6 +24,7 @@ import (
 // constant values to be used for testing
 const (
 	Namespace               = "--namespace--"
+	OtherNamespace          = "--other-namespace--"
 	Name                    = "--name--"
 	Host                    = "bye.com"
 	OtherHost               = "--some-other-hostname--"
