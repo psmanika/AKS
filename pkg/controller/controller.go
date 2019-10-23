@@ -23,7 +23,6 @@ import (
 type AppGwIngressController struct {
 	azClient        azure.AzClient
 	appGwIdentifier appgw.Identifier
-	ipAddressMap    map[string]k8scontext.IPAddress
 
 	k8sContext *k8scontext.Context
 	worker     *worker.Worker
@@ -46,7 +45,6 @@ func NewAppGwIngressController(azClient azure.AzClient, appGwIdentifier appgw.Id
 		k8sContext:      k8sContext,
 		recorder:        recorder,
 		configCache:     to.ByteSlicePtr([]byte{}),
-		ipAddressMap:    map[string]k8scontext.IPAddress{},
 		stopChannel:     make(chan struct{}),
 		agicPod:         agicPod,
 		metricStore:     metricStore,

@@ -415,7 +415,7 @@ func (c *Context) UpdateIngressStatus(ingressToUpdate v1beta1.Ingress, address I
 		return fmt.Errorf("Unable to get ingress %s/%s", ingressToUpdate.Namespace, ingressToUpdate.Name)
 	}
 
-	loadBalancerIngresses := []v1.LoadBalancerIngress{}
+	var loadBalancerIngresses []v1.LoadBalancerIngress
 	if address != "" {
 		loadBalancerIngresses = append(loadBalancerIngresses, v1.LoadBalancerIngress{
 			IP: string(address),
