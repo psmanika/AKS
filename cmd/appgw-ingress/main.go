@@ -96,6 +96,16 @@ func main() {
 	k8sContext := k8scontext.NewContext(kubeClient, crdClient, istioCrdClient, namespaces, *resyncPeriod, metricStore)
 	agicPod := k8sContext.GetAGICPod(env)
 
+	// namespace validations
+	if err := validateNamespaces(namespaces, kubeClient); err != nil {
+		glog.Fatal(err) // side-effect: will panic on non-existent namespace
+	}
+	if len(namespaces) == 0 {
+		glog.Info("Ingress Controller will observe all namespaces.")
+	} else {
+		glog.Info("Ingress Controller will observe the following namespaces:", strings.Join(namespaces, ","))
+	}
+
 	// get the details from Azure Context
 	azContext, err := azure.NewAzContext(env.AzContextLocation)
 	if err != nil {
@@ -137,7 +147,7 @@ func main() {
 	}
 
 	// create a new agic controller
-	appGwIngressController := controller.NewAppGwIngressController(azClient, appGwIdentifier, k8sContext, recorder, metricStore, agicPod)
+	appGwIngressController := controller.NewAppGwIngressController(azClient, appGwIdentifier, k8sContext, recorder, metricStore, agicPod, env.HostedOnHcp)
 
 	// initialize the http server and start it
 	httpServer := httpserver.NewHTTPServer(
@@ -159,7 +169,8 @@ func main() {
 		azClient.SetAuthorizer(authorizer)
 	}
 
-	if _, err = azClient.GetGateway(); err != nil {
+	appGw, err := azClient.GetGateway()
+	if err != nil {
 		if err == azure.ErrAppGatewayNotFound && env.EnableDeployAppGateway {
 			if env.AppGwSubnetID != "" {
 				err = azClient.DeployGatewayWithSubnet(env.AppGwSubnetID)
@@ -174,6 +185,8 @@ func main() {
 				}
 				glog.Fatal(errorLine)
 			}
+
+			appGw, _ = azClient.GetGateway()
 		} else {
 			errorLine := fmt.Sprint("Failed authenticating with Azure Resource Manager: ", err)
 			if agicPod != nil {
@@ -183,18 +196,7 @@ func main() {
 		}
 	}
 
-	// namespace validations
-	if err := validateNamespaces(namespaces, kubeClient); err != nil {
-		glog.Fatal(err) // side-effect: will panic on non-existent namespace
-	}
-	if len(namespaces) == 0 {
-		glog.Info("Ingress Controller will observe all namespaces.")
-	} else {
-		glog.Info("Ingress Controller will observe the following namespaces:", strings.Join(namespaces, ","))
-	}
-
 	// fatal config validations
-	appGw, _ := azClient.GetGateway()
 	if err := appgw.FatalValidateOnExistingConfig(recorder, appGw.ApplicationGatewayPropertiesFormat, env); err != nil {
 		glog.Fatal("Got a fatal validation error on existing Application Gateway config. Please update Application Gateway or the controller's helm config. Error:", err)
 	}

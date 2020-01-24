@@ -78,6 +78,9 @@ const (
 
 	// AttachWAFPolicyToListenerVarName is an environment variable name.
 	AttachWAFPolicyToListenerVarName = "ATTACH_WAF_POLICY_TO_LISTENER"
+
+	// HostedOnHcpVarName  is an environment variable name.
+	HostedOnHcpVarName = "HOSTED_ON_HCP"
 )
 
 // EnvVariables is a struct storing values for environment variables.
@@ -104,6 +107,7 @@ type EnvVariables struct {
 	UseManagedIdentityForPod   bool
 	HTTPServicePort            string
 	AttachWAFPolicyToListener  bool
+	HostedOnHcp                bool
 }
 
 var portNumberValidator = regexp.MustCompile(`^[0-9]{4,5}$`)
@@ -134,6 +138,7 @@ func GetEnv() EnvVariables {
 		UseManagedIdentityForPod:   GetEnvironmentVariable(UseManagedIdentityForPodVarName, "false", boolValidator) == "true",
 		HTTPServicePort:            GetEnvironmentVariable(HTTPServicePortVarName, "8123", portNumberValidator),
 		AttachWAFPolicyToListener:  GetEnvironmentVariable(AttachWAFPolicyToListenerVarName, "false", boolValidator) == "true",
+		HostedOnHcp:                GetEnvironmentVariable(HostedOnHcpVarName, "false", boolValidator) == "true",
 	}
 
 	return env
